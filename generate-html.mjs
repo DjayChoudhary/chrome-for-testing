@@ -14,40 +14,33 @@
  * limitations under the License.
  */
 
-import fs from "node:fs/promises";
+import fs from 'node:fs/promises';
 
-import { escape as escapeHtml } from "lodash-es";
-import { minify as minifyHtml } from "html-minifier-terser";
+import { escape as escapeHtml } from 'lodash-es';
+import { minify as minifyHtml } from 'html-minifier-terser';
 
-import {
-	predatesChromeDriverAvailability,
-	predatesChromeHeadlessShellAvailability,
-} from "./is-older-version.mjs";
-import { readJsonFile } from "./json-utils.mjs";
+import {predatesChromeDriverAvailability, predatesChromeHeadlessShellAvailability} from './is-older-version.mjs';
+import {readJsonFile} from './json-utils.mjs';
 
-const OK = "\u2705";
-const NOT_OK = "\u274C";
+const OK = '\u2705';
+const NOT_OK = '\u274C';
 
 const renderDownloads = (downloads, version, forceOk = false) => {
 	const list = [];
 	for (const [binary, downloadsPerBinary] of Object.entries(downloads)) {
-		if (
-			binary === "chromedriver" &&
-			predatesChromeDriverAvailability(version)
-		) {
+		if (binary === 'chromedriver' && predatesChromeDriverAvailability(version)) {
 			continue;
 		}
-		if (
-			binary === "chrome-headless-shell" &&
-			predatesChromeHeadlessShellAvailability(version)
-		) {
+		if (binary === 'chrome-headless-shell' && predatesChromeHeadlessShellAvailability(version)) {
 			continue;
 		}
 		for (const download of downloadsPerBinary) {
 			list.push(
 				`<tr class="status-${
-					forceOk || download.status === 200 ? "ok" : "not-ok"
-				}"><th><code>${escapeHtml(binary)}</code><th><code>${escapeHtml(
+					(forceOk || download.status === 200) ? 'ok' : 'not-ok'
+				}"><th><code>${escapeHtml(
+					binary
+				)}</code><th><code>${escapeHtml(
 					download.platform
 				)}</code><td><code><a href='${download.url}'>${escapeHtml(
 					download.url
@@ -65,7 +58,7 @@ const renderDownloads = (downloads, version, forceOk = false) => {
 						<th>URL
 						<th>HTTP status
 				<tbody>
-					${list.join("")}
+					${list.join('')}
 			</table>
 		</div>
 	`;
@@ -83,7 +76,7 @@ const render = (data) => {
 					<th><a href="#${escapeHtml(channel.toLowerCase())}">${escapeHtml(channel)}</a>
 					<td><code>${escapeHtml(version)}</code>
 					<td><code>r${escapeHtml(revision)}</code>
-					<td>${OK}
+					<td>${ OK }
 			`);
 		} else {
 			const fallbackData = lastKnownGoodVersions.channels[channel];
@@ -94,27 +87,23 @@ const render = (data) => {
 					<th><a href="#${escapeHtml(channel.toLowerCase())}">${escapeHtml(channel)}</a>
 					<td><code>${escapeHtml(fallbackVersion)}</code>
 					<td><code>r${escapeHtml(fallbackRevision)}</code>
-					<td>${OK}
+					<td>${ OK }
 				<tr class="status-upcoming">
-					<th><a href="#${escapeHtml(channel.toLowerCase())}">${escapeHtml(
-				channel
-			)} (upcoming)</a>
+					<th><a href="#${escapeHtml(channel.toLowerCase())}">${escapeHtml(channel)} (upcoming)</a>
 					<td><code>${escapeHtml(version)}</code>
 					<td><code>r${escapeHtml(revision)}</code>
-					<td>${NOT_OK}
+					<td>${ NOT_OK }
 			`);
 		}
 		main.push(`
 			<section id="${escapeHtml(channel.toLowerCase())}" class="status-${
-			isOk ? "ok" : "not-ok"
+			isOk ? 'ok' : 'not-ok'
 		}">
 			`);
 		if (isOk) {
 			main.push(`
 				<h2>${escapeHtml(channel)}</h2>
-				<p>Version: <code>${escapeHtml(version)}</code> (<code>r${escapeHtml(
-				revision
-			)}</code>)</p>
+				<p>Version: <code>${escapeHtml(version)}</code> (<code>r${escapeHtml(revision)}</code>)</p>
 				${renderDownloads(downloads, version)}
 			`);
 		} else {
@@ -124,13 +113,9 @@ const render = (data) => {
 			const fallbackDownloads = fallbackChannelData.downloads;
 			main.push(`
 				<h2>${escapeHtml(channel)}</h2>
-				<p>Version: <code>${escapeHtml(fallbackVersion)}</code> (<code>r${escapeHtml(
-				fallbackRevision
-			)}</code>)</p>
+				<p>Version: <code>${escapeHtml(fallbackVersion)}</code> (<code>r${escapeHtml(fallbackRevision)}</code>)</p>
 				${renderDownloads(fallbackDownloads, fallbackVersion, true)}
-				<p>Upcoming version: <code>${escapeHtml(version)}</code> (<code>r${escapeHtml(
-				revision
-			)}</code>)</p>
+				<p>Upcoming version: <code>${escapeHtml(version)}</code> (<code>r${escapeHtml(revision)}</code>)</p>
 				${renderDownloads(downloads, version)}
 			`);
 		}
@@ -148,24 +133,21 @@ const render = (data) => {
 						<th>Revision
 						<th>Status
 				<tbody>
-					${summary.join("")}
+					${summary.join('')}
 			</table>
 		</div>
 
-		${main.join("")}
+		${main.join('')}
 	`;
 };
 
-const data = await readJsonFile("./data/dashboard.json");
-const lastKnownGoodVersions = await readJsonFile(
-	"data/last-known-good-versions-with-downloads.json"
-);
+const data = await readJsonFile('./data/dashboard.json');
+const lastKnownGoodVersions = await readJsonFile('data/last-known-good-versions-with-downloads.json');
 
-const htmlTemplate = await fs.readFile("./_tpl/template.html", "utf8");
-const html = htmlTemplate
-	.toString()
-	.replace("%%%DATA%%%", render(data))
-	.replace("%%%TIMESTAMP%%%", data.timestamp);
+const htmlTemplate = await fs.readFile('./_tpl/template.html', 'utf8');
+const html = htmlTemplate.toString()
+	.replace('%%%DATA%%%', render(data))
+	.replace('%%%TIMESTAMP%%%', data.timestamp);
 const minifiedHtml = await minifyHtml(html, {
 	collapseBooleanAttributes: true,
 	collapseInlineTagWhitespace: false,
@@ -188,4 +170,4 @@ const minifiedHtml = await minifyHtml(html, {
 	sortAttributes: true,
 	sortClassName: true,
 });
-await fs.writeFile("./dist/index.html", minifiedHtml);
+await fs.writeFile('./dist/index.html', minifiedHtml);
